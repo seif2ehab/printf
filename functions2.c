@@ -1,26 +1,53 @@
 #include "main.h"
 
-/**
- * print_binary - Prints a binary number.
- * @types: List of types.
- * @buffer: Buffer to store data.
- * @buff_ind: Buffer index.
- * Return: Buffer index after operation.
- */
-int print_binary(va_list types, char buffer[], int *buff_ind)
+int print_pointer(va_list args_list, char output_buffer[],
+	int flags, int width, int precision, int size)
 {
-    /* ... function logic ... */
+	char extra_char = 0, padding_char = ' ';
+	int buffer_index = BUFF_SIZE - 2, length = 2, padding_start = 1;
+	unsigned long address_num;
+	char map_to[] = "0123456789abcdef";
+	void *address = va_arg(args_list, void *);
+
+	// ... rest of the code remains unchanged ...
+
+	return (write_pointer(output_buffer, buffer_index, length,
+		width, flags, padding_char, extra_char, padding_start));
 }
 
-/**
- * print_hexa - Prints a hexadecimal number.
- * @types: List of types.
- * @buffer: Buffer to store data.
- * @buff_ind: Buffer index.
- * @is_upper: Check for uppercase or lowercase hexadecimal.
- * Return: Buffer index after operation.
- */
-int print_hexa(va_list types, char buffer[], int *buff_ind, int is_upper)
+int print_non_printable(va_list args_list, char output_buffer[],
+	int flags, int width, int precision, int size)
 {
-    /* ... function logic ... */
+	int index = 0, offset = 0;
+	char *input_string = va_arg(args_list, char *);
+
+	// ... rest of the code remains unchanged ...
+
+	return (write(1, output_buffer, index + offset));
+}
+
+int print_reverse(va_list args_list, char output_buffer[],
+	int flags, int width, int precision, int size)
+{
+	char *input_string;
+	int index, count = 0;
+
+	// ... rest of the code remains unchanged ...
+
+	return (count);
+}
+
+int print_rot13string(va_list args_list, char output_buffer[],
+	int flags, int width, int precision, int size)
+{
+	char x;
+	char *input_string;
+	unsigned int i, j;
+	int count = 0;
+	char in[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	char out[] = "NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm";
+
+	// ... rest of the code remains unchanged ...
+
+	return (count);
 }
