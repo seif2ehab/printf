@@ -1,76 +1,48 @@
-#include "main.h"
-
-// Function to output the buffer's content
-void output_buffer_content(char buf[], int *buf_idx);
+#include "holberton.h"
 
 /**
- * custom_printf - A custom implementation of printf.
- * @fmt: The format string.
- * 
- * Return: Number of characters printed.
+ * _printf - A function that produces output according to a format.
+ * @format: the format string.
+ * ...: the values to format and print.
+ * Return: the number of characters printed.
  */
-int custom_printf(const char *fmt, ...)
+int _printf(const char *format, ...)
 {
-	int i, result = 0, total_chars = 0;
-	int flag_vals, width_val, prec_val, type_val, buf_idx = 0;
-	va_list args_list;
-	char buf[BUFF_SIZE];
+    va_list types;
+    int i = 0, buff_ind = 0;
+    char buffer[BUFF_SIZE] = {0};
 
-	// Check if the format string is not provided
-	if (!fmt)
-		return (-1);
-
-	va_start(args_list, fmt);
-
-	for (i = 0; fmt && fmt[i] != '\0'; i++)
-	{
-		// If current character is not a placeholder
-		if (fmt[i] != '%')
-		{
-			buf[buf_idx++] = fmt[i];
-			if (buf_idx == BUFF_SIZE)
-				output_buffer_content(buf, &buf_idx);
-			total_chars++;
-		}
-		else
-		{
-			// Process the buffer content
-			output_buffer_content(buf, &buf_idx);
-
-			// Get formatting information
-			flag_vals = get_flag_values(fmt, &i);
-			width_val = get_width_value(fmt, &i, args_list);
-			prec_val = get_precision_value(fmt, &i, args_list);
-			type_val = get_type_value(fmt, &i);
-			i++;
-
-			// Print according to the format
-			result = format_handler(fmt, &i, args_list, buf,
-				flag_vals, width_val, prec_val, type_val);
-			if (result == -1)
-				return (-1);
-
-			total_chars += result;
-		}
-	}
-
-	// Empty any remaining content in the buffer
-	output_buffer_content(buf, &buf_idx);
-
-	va_end(args_list);
-
-	return (total_chars);
+    if (!format || (format[0] == '%' && format[1] == '\0'))
+        return (-1);
+    va_start(types, format);
+    while (format && format[i])
+    {
+        if (format[i] == '%' && format[i + 1])
+        {
+            get_function(format[i + 1])(types, buffer, &buff_ind);
+            i++;
+        }
+        else
+        {
+            buffer[buff_ind++] = format[i];
+        }
+        if (buff_ind == BUFF_SIZE)
+            print_buffer(buffer, &buff_ind);
+        i++;
+    }
+    va_end(types);
+    if (buff_ind)
+        print_buffer(buffer, &buff_ind);
+    return (buff_ind);
 }
 
 /**
- * output_buffer_content - Outputs the buffer's current content.
- * @buf: Buffer containing characters.
- * @buf_idx: Index representing buffer's length.
+ * print_buffer - Prints the buffer content to stdout.
+ * @buffer: the buffer to print.
+ * @buff_ind: the pointer to the buffer index.
  */
-void output_buffer_content(char buf[], int *buf_idx)
+void print_buffer(char buffer[], int *buff_ind)
 {
-	if (*buf_idx > 0)
-		write(1, buf, *buf_idx);
-
-	*buf_idx = 0;
+    write(1, buffer, *buff_ind);
+    *buff_ind = 0;
 }
