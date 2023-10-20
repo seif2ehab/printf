@@ -1,65 +1,76 @@
 #include "main.h"
 
-/**
- * output_buffer - Outputs the buffer's content to the standard output.
- * @buf: Buffer containing characters.
- * @index: Current position in the buffer.
- */
-void output_buffer(char *buf, int *index)
-{
-	if (*index > 0)
-		write(1, buf, *index);
-
-	*index = 0;
-}
+// Function to output the buffer's content
+void output_buffer_content(char buf[], int *buf_idx);
 
 /**
- * custom_printf - A custom implementation of the printf function.
- * @pattern: The format string.
- *
+ * custom_printf - A custom implementation of printf.
+ * @fmt: The format string.
+ * 
  * Return: Number of characters printed.
  */
-int custom_printf(const char *pattern, ...)
+int custom_printf(const char *fmt, ...)
 {
-	int pos, char_count = 0, temp_count = 0;
-	int formatting_flags, field_width, num_precision, specifier_size;
-	int buffer_pos = 0;
-	va_list args;
-	char temp_buffer[BUFF_SIZE];
+	int i, result = 0, total_chars = 0;
+	int flag_vals, width_val, prec_val, type_val, buf_idx = 0;
+	va_list args_list;
+	char buf[BUFF_SIZE];
 
-	if (!pattern)
+	// Check if the format string is not provided
+	if (!fmt)
 		return (-1);
 
-	va_start(args, pattern);
+	va_start(args_list, fmt);
 
-	for (pos = 0; pattern[pos]; pos++)
+	for (i = 0; fmt && fmt[i] != '\0'; i++)
 	{
-		if (pattern[pos] != '%')
+		// If current character is not a placeholder
+		if (fmt[i] != '%')
 		{
-			temp_buffer[buffer_pos++] = pattern[pos];
-			if (buffer_pos == BUFF_SIZE)
-				output_buffer(temp_buffer, &buffer_pos);
-			char_count++;
+			buf[buf_idx++] = fmt[i];
+			if (buf_idx == BUFF_SIZE)
+				output_buffer_content(buf, &buf_idx);
+			total_chars++;
 		}
 		else
 		{
-			output_buffer(temp_buffer, &buffer_pos);
-			formatting_flags = fetch_flags(pattern, &pos);
-			field_width = fetch_width(pattern, &pos, args);
-			num_precision = fetch_precision(pattern, &pos, args);
-			specifier_size = fetch_size(pattern, &pos);
-			pos++;
-			temp_count = manage_formatting(pattern, &pos, args, temp_buffer,
-				formatting_flags, field_width, num_precision, specifier_size);
-			if (temp_count == -1)
+			// Process the buffer content
+			output_buffer_content(buf, &buf_idx);
+
+			// Get formatting information
+			flag_vals = get_flag_values(fmt, &i);
+			width_val = get_width_value(fmt, &i, args_list);
+			prec_val = get_precision_value(fmt, &i, args_list);
+			type_val = get_type_value(fmt, &i);
+			i++;
+
+			// Print according to the format
+			result = format_handler(fmt, &i, args_list, buf,
+				flag_vals, width_val, prec_val, type_val);
+			if (result == -1)
 				return (-1);
-			char_count += temp_count;
+
+			total_chars += result;
 		}
 	}
 
-	output_buffer(temp_buffer, &buffer_pos);
+	// Empty any remaining content in the buffer
+	output_buffer_content(buf, &buf_idx);
 
-	va_end(args);
+	va_end(args_list);
 
-	return (char_count);
+	return (total_chars);
+}
+
+/**
+ * output_buffer_content - Outputs the buffer's current content.
+ * @buf: Buffer containing characters.
+ * @buf_idx: Index representing buffer's length.
+ */
+void output_buffer_content(char buf[], int *buf_idx)
+{
+	if (*buf_idx > 0)
+		write(1, buf, *buf_idx);
+
+	*buf_idx = 0;
 }
