@@ -1,65 +1,77 @@
-#include "main.h"
-
-void flushBuffer(char buf[], int *bufIndex);
+#include <stdio.h>
+#include <stdarg.h>
 
 /**
- * _printf - Printf function
- * @format: format.
- * Return: Printed chars.
+ * custom_printf - Custom implementation of printf.
+ * @input_format: The format string.
+ *
+ * Return: Number of characters printed.
  */
-int _printf(const char *format, ...)
+int custom_printf(const char *input_format, ...);
+
+/**
+ * main - Main function to test custom_printf.
+ *
+ * Return: Always 0.
+ */
+int main(void)
 {
-	int idx, charsThisLoop = 0, totalCharsPrinted = 0;
-	int fmtFlags, fmtWidth, fmtPrecision, fmtSize, bufIndex = 0;
-	va_list argList;
-	char buf[BUFF_SIZE];
-
-	if (format == NULL)
-		return (-1);
-
-	va_start(argList, format);
-
-	for (idx = 0; format && format[idx] != '\0'; idx++)
-	{
-		if (format[idx] != '%')
-		{
-			buf[bufIndex++] = format[idx];
-			if (bufIndex == BUFF_SIZE)
-				flushBuffer(buf, &bufIndex);
-			totalCharsPrinted++;
-		}
-		else
-		{
-			flushBuffer(buf, &bufIndex);
-			fmtFlags = get_flags(format, &idx);
-			fmtWidth = get_width(format, &idx, argList);
-			fmtPrecision = get_precision(format, &idx, argList);
-			fmtSize = get_size(format, &idx);
-			++idx;
-			charsThisLoop = handle_print(format, &idx, argList, buf,
-				fmtFlags, fmtWidth, fmtPrecision, fmtSize);
-			if (charsThisLoop == -1)
-				return (-1);
-			totalCharsPrinted += charsThisLoop;
-		}
-	}
-
-	flushBuffer(buf, &bufIndex);
-
-	va_end(argList);
-
-	return (totalCharsPrinted);
+    custom_printf("Hello, %corld! %s\n", 'W', "This is a test.");
+    return (0);
 }
 
 /**
- * flushBuffer - Prints the contents of the buffer if it exist
- * @buf: Array of chars
- * @bufIndex: Index at which to add next char, represents the length.
+ * custom_printf - Custom implementation of printf.
+ * @input_format: The format string.
+ *
+ * Return: Number of characters printed.
  */
-void flushBuffer(char buf[], int *bufIndex)
+int custom_printf(const char *input_format, ...)
 {
-	if (*bufIndex > 0)
-		write(1, buf, *bufIndex);
+    va_list arg_list;
+    int chars_printed = 0;
 
-	*bufIndex = 0;
+    va_start(arg_list, input_format);
+    while (*input_format)
+    {
+        if (*input_format == '%')
+        {
+            input_format++;
+            switch (*input_format)
+            {
+                case 'c':
+                    putchar(va_arg(arg_list, int));
+                    chars_printed++;
+                    break;
+                case 's':
+                {
+                    char *str = va_arg(arg_list, char *);
+                    while (*str)
+                    {
+                        putchar(*str);
+                        chars_printed++;
+                        str++;
+                    }
+                    break;
+                }
+                case '%':
+                    putchar('%');
+                    chars_printed++;
+                    break;
+                default:
+                    putchar('%');
+                    putchar(*input_format);
+                    chars_printed += 2;
+                    break;
+            }
+        }
+        else
+        {
+            putchar(*input_format);
+            chars_printed++;
+        }
+        input_format++;
+    }
+    va_end(arg_list);
+    return (chars_printed);
 }
